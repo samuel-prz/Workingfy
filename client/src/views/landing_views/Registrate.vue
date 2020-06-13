@@ -1,0 +1,288 @@
+<template>
+    <div>
+
+        <Navbar/>
+
+        <Snackbar :snackbar="snackbarData"/>
+
+        <!-- imagen de fondo -->
+        <div class="bg"></div>
+        <!-- imagen de fondo -->
+
+        <v-container class="margin-extra">
+            <v-card class="pa-12" min-height="180" shaped>
+                <v-layout wrap="">
+                    <v-flex md12 xs12>
+
+                        <h2 class="font-italic">
+                            Registrate para: 
+                            <v-btn-toggle rounded class="mx-1">
+                                <v-btn color="primary" text @click="tipoDeCuenta = 'freelancer'" >
+                                    Buscar trabajo 
+                                </v-btn>
+                                <v-btn color="primary" text @click="tipoDeCuenta = 'cliente'" >
+                                    Buscar freelancer
+                                </v-btn>
+                            </v-btn-toggle>
+                        </h2>
+
+                        <!-- Formulario de registro ------------------------->
+                        <v-form 
+                        @submit.prevent="enviarDatos"
+                        v-if="tipoDeCuenta" 
+                        v-model="validar" 
+                        ref="form" 
+                        :lazy-validation="lazy">
+                           
+                            <div class="my-10">
+                                <h1 class="font-weight-bold">
+                                    Crea una cuenta como <span class="primary--text"> {{ tipoDeCuenta }} </span> 
+                                </h1>
+                                <p class="info--text font-italic">Todos los campos son obligatorios *</p>
+                            </div>
+                            
+                            <v-layout wrap="">
+
+                                <v-flex md5 xs12>
+                                    <v-text-field
+                                    v-model="nombre" 
+                                    type="text"  
+                                    label="Nombre" 
+                                    class="my-1"
+                                    outlined 
+                                    required
+                                    :rules="rules.default"
+                                    ></v-text-field>
+                                </v-flex>
+
+                                <v-flex md5 offset-md-1 xs12>
+                                    <v-text-field
+                                    v-model="apellido" 
+                                    type="text"  
+                                    label="Apellido" 
+                                    class="my-1"
+                                    outlined 
+                                    required
+                                    :rules="rules.default"
+                                    ></v-text-field>
+                                </v-flex>
+
+                            </v-layout>
+                            <v-layout wrap="">
+
+                                <v-flex md5 xs12>
+                                    <v-text-field
+                                    v-model="cedula" 
+                                    type="number"  
+                                    label="Cédula" 
+                                    class="my-1"
+                                    outlined 
+                                    required
+                                    :rules="rules.cedula"
+                                    ></v-text-field>
+                                </v-flex>
+
+                                <v-flex md5 offset-md-1 xs12>
+                                    <v-text-field
+                                    v-model="telefono" 
+                                    type="number"  
+                                    label="Telefono" 
+                                    class="my-1"
+                                    outlined 
+                                    required
+                                    hint="Formato: 8093334444"
+                                    :rules="rules.default"
+                                    ></v-text-field>
+                                </v-flex>
+
+                            </v-layout>
+                            <v-layout wrap="">
+
+                                <v-flex md5 xs12>
+                                    <v-text-field
+                                    v-model="direccion" 
+                                    type="text"  
+                                    label="Dirección" 
+                                    class="my-1"
+                                    outlined 
+                                    required
+                                    hint="Formato: provincia, sector, calle"
+                                    :rules="rules.default"
+                                    ></v-text-field>
+                                </v-flex>
+
+                                <v-flex md5 offset-md-1 xs12>
+                                    <v-text-field
+                                    v-model="correo" 
+                                    type="e-mail"  
+                                    label="Correo electronico" 
+                                    class="my-1"
+                                    outlined 
+                                    required
+                                    :rules="rules.correo"
+                                    ></v-text-field>
+                                </v-flex>
+
+                            </v-layout>
+                            <v-layout wrap="">
+
+                                <v-flex md5 xs12>
+                                    <v-text-field
+                                    v-model="contrasena" 
+                                    type="password"  
+                                    label="Contraseña" 
+                                    class="my-1"
+                                    outlined 
+                                    required
+                                    hint="Debe contener al menos 8 caracteres"
+                                    :rules="rules.contrasena"
+                                    ></v-text-field>
+                                </v-flex>
+
+                                <v-flex v-if="tipoDeCuenta === 'freelancer'" md5 offset-md-1 xs12>
+                                    <v-select
+                                    :items="profesiones"
+                                    item-text="text"
+                                    item-value="value"
+                                    label="Profesiones"
+                                    outlined
+                                    :rules="rules.profesion"
+                                    ></v-select>
+                                </v-flex>
+
+                            </v-layout>
+
+                            <v-btn 
+                            class="my-5 mr-5"  
+                            x-large 
+                            outlined
+                            to="/login"
+                            color="primary"
+                            >
+                             Tengo una cuenta
+                            </v-btn>
+
+                            <v-btn 
+                            class="my-5" 
+                            :loading="loading" 
+                            :disabled="!validar"  
+                            x-large 
+                            color="primary"
+                            type="submmit"
+                            >
+                                Crear cuenta
+                            </v-btn>
+                     
+                        </v-form>
+                        <!-- Formulario de registro ------------------------->
+                    </v-flex>
+                </v-layout>
+            </v-card>
+        </v-container>
+
+        <Footer/>
+    </div>
+</template>
+
+<script>
+import Navbar from '@/components/Navbar.vue'
+import Footer from '@/components/Footer.vue'
+import Snackbar from '@/components/Snackbar.vue'
+
+export default {
+    name: 'Registrate',
+    components:{
+        Navbar,
+        Footer,
+        Snackbar
+    },
+    data() {
+        return {
+
+            // datos de los campos del formulario 
+            nombre: null,
+            apellido: null,
+            cedula: null,
+            telefono: null,
+            direccion: null,
+            correo: null,
+            contrasena: null,
+            profesiones: [],
+
+            // datos de control
+            loading: false,
+            tipoDeCuenta: null,
+            validar: true,
+            lazy: false,
+            snackbarData: { active: false, text: 'Error al enviar datos', color: 'error', icon: 'error'},
+
+            // reglas del formulario, para validaciones 
+            rules: {
+                default: [
+                    v => !!v || 'Campo obligatorio', 
+                    v => ( v && v.length <= 50) || 'Debe tener menos de 50 caracteres'
+                ],
+                cedula: [
+                    v => !!v || 'Campo obligatorio',
+                    v => (v && v.toString().length == 11) || 'Una cedula contiene 11 digitos, verifique'
+                ],
+                correo: [
+                    v => /.+@.+\..+/.test(v) || 'No es un correo valido, verifique'
+                ],
+                contrasena: [
+                   v => !!v || 'Campo obligatorio', 
+                   v => ( v && v.length >= 8) || 'Debe contener al menos 8 caracteres'
+                ],
+                profesion: [
+                    v => !!v || 'Campo obligatorio'
+                ]
+            }
+
+        }
+    },
+    created() {
+
+        this.consultarProfesion();
+
+    },
+    methods: {
+        //enviando formulario al backend
+        guardarDatos() {
+            if(this.tipoDeCuenta === 'freelancer') {
+                this.loading = true;
+                console.log('enviando los datos por la ruta de insertar freelancer...');
+                this.loading = false;
+            }
+            else {
+                this.loading = true;
+                console.log('enviando los datos por la ruta de insertar cliente...');
+                this.loading = false;
+            }
+        },
+        // llenando el campo profesiones con las opciones
+        consultarProfesion() {
+            console.log('Realizando peticion al backend...');
+            this.profesiones = [
+                { value: 1, text: 'primera profesion'},
+                { value: 2, text: 'segunda profesion'},
+                { value: 3, text: 'tercera profesion'},
+            ];
+        }
+    },
+}
+</script>
+
+<style scoped>
+.bg {
+    width: 100%;
+    height: 90%;
+    position: absolute;
+    background: url('../../assets/registro_img.jpg') no-repeat center center;
+    background-size: cover;
+}
+
+.margin-extra{
+    margin-top: 150px;
+    margin-bottom: 300px;
+}
+</style>
