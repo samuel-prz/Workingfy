@@ -28,7 +28,7 @@
 
                         <!-- Formulario de registro ------------------------->
                         <v-form 
-                        @submit.prevent="enviarDatos"
+                        @submit.prevent="guardarDatos"
                         v-if="tipoDeCuenta" 
                         v-model="validar" 
                         ref="form" 
@@ -142,8 +142,9 @@
                                 <v-flex v-if="tipoDeCuenta === 'freelancer'" md5 offset-md-1 xs12>
                                     <v-select
                                     :items="profesiones"
-                                    item-text="text"
-                                    item-value="value"
+                                    v-model="profesion"
+                                    item-text="nombre"
+                                    item-value="id"
                                     label="Profesiones"
                                     outlined
                                     :rules="rules.profesion"
@@ -185,9 +186,10 @@
 </template>
 
 <script>
-import Navbar from '@/components/Navbar.vue'
-import Footer from '@/components/Footer.vue'
-import Snackbar from '@/components/Snackbar.vue'
+import Navbar from '@/components/Navbar.vue';
+import Footer from '@/components/Footer.vue';
+import Snackbar from '@/components/Snackbar.vue';
+import axios from 'axios';
 
 export default {
     name: 'Registrate',
@@ -207,14 +209,17 @@ export default {
             direccion: null,
             correo: null,
             contrasena: null,
-            profesiones: [],
+            profesion: null,
 
+            
             // datos de control
             loading: false,
             tipoDeCuenta: null,
+            profesiones: [],
             validar: true,
             lazy: false,
             snackbarData: { active: false, text: 'Error al enviar datos', color: 'error', icon: 'error'},
+
 
             // reglas del formulario, para validaciones 
             rules: {
@@ -240,35 +245,76 @@ export default {
 
         }
     },
-    created() {
-
-        this.consultarProfesion();
-
-    },
-    methods: {
-        //enviando formulario al backend
-        guardarDatos() {
-            if(this.tipoDeCuenta === 'freelancer') {
-                this.loading = true;
-                console.log('enviando los datos por la ruta de insertar freelancer...');
-                this.loading = false;
-            }
-            else {
-                this.loading = true;
-                console.log('enviando los datos por la ruta de insertar cliente...');
-                this.loading = false;
-            }
-        },
-        // llenando el campo profesiones con las opciones
-        consultarProfesion() {
-            console.log('Realizando peticion al backend...');
-            this.profesiones = [
-                { value: 1, text: 'primera profesion'},
-                { value: 2, text: 'segunda profesion'},
-                { value: 3, text: 'tercera profesion'},
-            ];
+    async created() {
+        //llenar el select-input con las profesiones 
+        try {
+            const res = await axios.get('/api/consultarProfesion');
+            this.profesiones = res.data;
+        } catch (error) {
+            console.log(error);
+            this.snackbarData = { active: true, text: 'Error al cargar listado de profesiones...', color: 'error', icon: 'error'};
         }
     },
+    methods: {
+        async guardarDatos() {
+            this.loading = true;
+
+            const datosDeUsuario = {
+                nombre: this.nombre,
+                apellido: this.apellido,
+                cedula: this.cedula,
+                telefono: this.telefono,
+                direccion: this.direccion,
+                correo: this.correo,
+                contrasena: this.contrasena,
+                id_profesion: this.profesion,
+                estado: 'A'
+            };
+            
+
+            //verifica que tipo de cuenta se creara el usuario e implementar la ruta correcta
+            if(this.tipoDeCuenta === 'freelancer') {
+
+                try {
+                    const res = await axios.post('/api/insertarFreelancer', datosDeUsuario);
+                    //verifica el mensaje que devolvio el servidor
+                    if(res.message === 'success'){
+                        //redireccionar a su perfil
+                    }
+                    else{
+                        this.snackbarData = { active: true, text: `${res.message}, intente mas tarde...`, color: 'error', icon: 'error'};
+                    }
+                } catch (error) {
+                    console.log(error);
+                    this.snackbarData = { active: true, text: 'Algo salio mal, comprube su conexion a internet o intentelo mas tarde...', color: 'error', icon: 'error'};
+                }
+                this.loading = false;
+
+            }
+            //enviando datos a la ruta de cliente, para registrarlo
+            else {
+
+                try {
+                    //eleminando la propiedad id_profesion, ya que no se utiliza en la tabla cliente
+                    delete datosDeUsuario.id_profesion;
+
+                    const res = await axios.post('/api/insertarCliente', datosDeUsuario);
+                    //verifica el mensaje que devolvio el servidor
+                    if(res.message === 'success'){
+                        //redireccionar a su perfil
+                    }
+                    else{
+                        this.snackbarData = { active: true, text: `${res.message}, intente mas tarde...`, color: 'error', icon: 'error'};
+                    }
+                } catch (error) {
+                    console.log(error);
+                    this.snackbarData = { active: true, text: 'Algo salio mal, comprube su conexion a internet o intentelo mas tarde...', color: 'error', icon: 'error'};
+                }
+                this.loading = false;
+
+            }
+        },
+    }
 }
 </script>
 

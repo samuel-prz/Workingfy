@@ -8,9 +8,14 @@ const app = express();
 
 //middleware
 app.use(morgan('dev'));
+app.use(express.json())
+
 
 //routes
-app.use(require('./routes/index.js'));
+app.use('/api', require('./routes/profesion.route.js'));
+app.use('/api', require('./routes/freelancer.route.js'));
+app.use('/api', require('./routes/cliente.route.js'));
+
 
 //Inicio del servidor
 app.listen(3000, ()=>{

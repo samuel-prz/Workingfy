@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 13-06-2020 a las 18:30:00
+-- Tiempo de generación: 27-06-2020 a las 17:50:00
 -- Versión del servidor: 10.1.30-MariaDB
 -- Versión de PHP: 7.2.1
 
@@ -87,6 +87,14 @@ CREATE TABLE `profesion` (
   `estado` char(1) COLLATE utf8_spanish_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
 
+--
+-- Volcado de datos para la tabla `profesion`
+--
+
+INSERT INTO `profesion` (`id`, `nombre`, `descripcion`, `estado`) VALUES
+(1, 'Plomero', 'Técnico en trabajos de instalación, mantenimiento, reparación, etc., de las conducciones de agua y aparatos sanitarios de una vivienda o edificio.', 'A'),
+(2, ' Electricista', 'Persona que tiene por oficio colocar y reparar instalaciones eléctricas.', 'A');
+
 -- --------------------------------------------------------
 
 --
@@ -123,7 +131,7 @@ ALTER TABLE `cliente`
 --
 ALTER TABLE `freelancer`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `id_profesion` (`id_profesion`);
+  ADD KEY `id_profesion` (`id_profesion`) USING BTREE;
 
 --
 -- Indices de la tabla `interesado`
@@ -137,7 +145,7 @@ ALTER TABLE `interesado`
 -- Indices de la tabla `profesion`
 --
 ALTER TABLE `profesion`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`) USING BTREE;
 
 --
 -- Indices de la tabla `proyecto`
@@ -173,7 +181,7 @@ ALTER TABLE `interesado`
 -- AUTO_INCREMENT de la tabla `profesion`
 --
 ALTER TABLE `profesion`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `proyecto`
@@ -186,17 +194,17 @@ ALTER TABLE `proyecto`
 --
 
 --
+-- Filtros para la tabla `freelancer`
+--
+ALTER TABLE `freelancer`
+  ADD CONSTRAINT `freelancer_ibfk_1` FOREIGN KEY (`id_profesion`) REFERENCES `profesion` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
 -- Filtros para la tabla `interesado`
 --
 ALTER TABLE `interesado`
   ADD CONSTRAINT `interesado_ibfk_1` FOREIGN KEY (`id_freelancer`) REFERENCES `freelancer` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `interesado_ibfk_2` FOREIGN KEY (`id_proyecto`) REFERENCES `proyecto` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Filtros para la tabla `profesion`
---
-ALTER TABLE `profesion`
-  ADD CONSTRAINT `profesion_ibfk_1` FOREIGN KEY (`id`) REFERENCES `freelancer` (`id_profesion`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Filtros para la tabla `proyecto`
